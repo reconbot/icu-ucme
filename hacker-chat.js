@@ -10,12 +10,12 @@ var HackerChat = module.exports = function(app, opt){
   opt.objectMode = true;
   Duplex.call(this, opt);
   this.app = app;
-  this.setupRead();
+  this.setupEvents();
 };
 
 util.inherits(HackerChat, Duplex);
 
-HackerChat.prototype.setupRead = function(){
+HackerChat.prototype.setupEvents = function(){
   var socket = this.socket = dgram.createSocket('udp4');
   var jsonStream = this.jsonStream = JSONStream.parse();
 
@@ -31,15 +31,19 @@ HackerChat.prototype.setupRead = function(){
       jsonStream.write(data);
     });
   });
+
+  this.on('finish', function(){
+    socket.close();
+  });
 };
 
 HackerChat.prototype._read = function(size){
-
+  // sockets aint streams and jsonStream aint a stream 2
 };
 
-HackerChat.prototype._write = function(data){
+HackerChat.prototype._write = function(data, encoding, cb){
   if (!Buffer.isBuffer(data)) {
     data = new Buffer(JSON.stringify(data));
   }
-  this.socket.send(data, 0, data.length, 31337, '255.255.255.255');
+  this.socket.send(data, 0, data.length, 31337, '255.255.255.255', cb);
 };
