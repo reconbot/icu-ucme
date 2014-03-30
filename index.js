@@ -110,7 +110,8 @@ var chooseDisplay = function(displays){
 
 var launchVnc = function(display) {
   if (os.platform()=== 'darwin') {
-    var vncUrl = 'vnc://' + display.host + ':' + display.display;
+    var port = display.display + 5900;
+    var vncUrl = 'vnc://' + display.host + ':' + port;
     spawn('open', [vncUrl], {
       detached: true,
       stdio: 'ignore'

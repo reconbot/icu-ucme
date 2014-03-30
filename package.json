@@ -1,6 +1,6 @@
 {
   "name": "icu-ucme",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Easy broadcast and reciever for vnc",
   "main": "index.js",
   "scripts": {
