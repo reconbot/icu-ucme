@@ -21,7 +21,6 @@
   "dependencies": {
     "gnode": "0.0.7",
     "co": "~3.0.5",
-    "thunkify": "0.0.1",
     "JSONStream": "~0.8.0"
   },
   "bin": {

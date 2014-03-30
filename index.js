@@ -1,5 +1,4 @@
 var co = require('co');
-var thunkify = require('thunkify');
 var net = require('net');
 var os = require('os');
 var HackerChat = require('./hacker-chat');
