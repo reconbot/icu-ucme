@@ -1,0 +1,31 @@
+{
+  "name": "icu-ucme",
+  "version": "0.0.1",
+  "description": "Easy broadcast and reciever for vnc",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/reconbot/icu-ucme.git"
+  },
+  "keywords": [
+    "vnc"
+  ],
+  "author": "Francis Gulotta <wizard@roborooter.com>",
+  "license": "BSD-2-Clause",
+  "bugs": {
+    "url": "https://github.com/reconbot/icu-ucme/issues"
+  },
+  "dependencies": {
+    "gnode": "0.0.7",
+    "co": "~3.0.5",
+    "thunkify": "0.0.1",
+    "JSONStream": "~0.8.0"
+  },
+  "bin": {
+    "icu": "./icu.js",
+    "ucme": "./ucme.js"
+  }
+}
