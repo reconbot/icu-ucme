@@ -3,6 +3,8 @@ var thunkify = require('thunkify');
 var net = require('net');
 var os = require('os');
 var HackerChat = require('./hacker-chat');
+var spawn = require('child_process').spawn;
+
 
 // test if the ho responds with "RFB"
 var checkVncServer = function (host, displayNum) {
@@ -54,16 +56,68 @@ var getIP4address = function(){
   return notInternal[0];
 };
 
-var displayData = function(){
-  return {
-    app: 'icu-ucme',
-    type: 'displayData',
-    data: {
-      name: os.hostname(),
-      display: 0,
-      host: getIP4address()
+var MSGS = {
+  displayData: function(){
+    return {
+      app: 'icu-ucme',
+      type: 'displayData',
+      data: {
+        name: os.hostname(),
+        display: 0,
+        host: getIP4address()
+      }
+    };
+  },
+  requestDisplayData: function(){
+    return {
+      app: 'icu-ucme',
+      type: 'requstDisplay'
+    };
+  }
+};
+
+var queryDisplays = function(hackerChat){
+  var displays = {};
+  var logDisplays = function(message) {
+    if(message && message.type =='displayData') {
+      var data = message.data;
+      displays[data.host + ":" + data.display] = data;
     }
   };
+
+  return function(cb){
+    hackerChat.on('data', logDisplays);
+    hackerChat.write(MSGS.requestDisplayData());
+    setTimeout(function(){
+      hackerChat.removeListener('data', logDisplays);
+
+      // get the array of values
+      var displayData = Object.keys(displays).map(function (key) {
+        return displays[key];
+      });
+
+      cb(null, displayData);
+    }, 300);
+  };
+};
+
+// choose the first display
+// it would be nice to ask about multiple displays
+var chooseDisplay = function(displays){
+  return function(cb){
+    cb(null, displays[0]);
+  };
+};
+
+var launchVnc = function(display) {
+  if (os.platform()=== 'darwin') {
+    var vncUrl = 'vnc://' + display.host + ':' + display.display;
+    spawn('open', [vncUrl], {
+      detached: true,
+      stdio: 'ignore'
+    });
+    return;
+  }
 };
 
 // Let people know you're ready to share your screen
@@ -76,12 +130,13 @@ var ucme = co(function*(){
   }
 
   // Broadcast on hacker chat that you can connect to me at primary ip and display 0 and my hostname is "whatever"
-  hackerChat.write(displayData());
+  hackerChat.write(MSGS.displayData());
+  console.log("Broadcasting: ", MSGS.displayData().data);
 
   // Listen for "any body broadcasting?" messages and respond
   hackerChat.on('data', function(data){
     if (data.type === 'requstDisplay') {
-      hackerChat.write(displayData());
+      hackerChat.write(MSGS.displayData());
       console.log("sending display data upon request");
     }
   });
@@ -90,10 +145,23 @@ var ucme = co(function*(){
 });
 
 var icu = co(function*(){
-  // hackerChat.broadcast(requestDisplayData());
-  yield 4;
+  var hackerChat = new HackerChat('icu-ucme');
+  // wait 300ms for ucme's to respond
+  var displays = yield queryDisplays(hackerChat);
+  if (displays.length === 0) {
+    console.log("No displays detected on localnetwork");
+    process.exit(1);
+  }
+
+  var display = yield chooseDisplay(displays);
+
+  console.log("launching", display);
+  launchVnc(display);
+
+  hackerChat.end();
 });
 
 module.exports = {
-  ucme: ucme
+  ucme: ucme,
+  icu: icu
 };
