@@ -19,9 +19,9 @@
     "url": "https://github.com/reconbot/icu-ucme/issues"
   },
   "dependencies": {
-    "gnode": "0.0.7",
-    "co": "~3.0.5",
-    "JSONStream": "~0.8.0"
+    "gnode": "0.1.2",
+    "co": "~4.6.0",
+    "JSONStream": "~1.2.1"
   },
   "bin": {
     "icu": "./icu.js",
